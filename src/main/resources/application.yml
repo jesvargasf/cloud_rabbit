@@ -1,0 +1,13 @@
+server:
+  port: 8080
+
+logging:
+  level:
+    cl.duoc.dsy1107.demo: INFO
+
+spring:
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest

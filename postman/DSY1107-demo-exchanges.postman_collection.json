@@ -1,0 +1,336 @@
+{
+  "info": {
+    "_postman_id": "a7c3e1d4-6b28-4f90-9c2e-d5a1107de001",
+    "name": "DSY1107 demo exchanges",
+    "description": "Direct, fanout, topic y DLQ. La API tiene que estar en http://localhost:8080. Despues de cada POST, espera un segundo y llama a Ver recibidos. El pedido en espera tarda 8 segundos en aparecer en la DLQ.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Ayuda",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8080/api",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["api"]
+        },
+        "description": "Lista las rutas."
+      },
+      "response": []
+    },
+    {
+      "name": "Direct",
+      "item": [
+        {
+          "name": "INFO solo monitor",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"level\": \"INFO\",\n  \"message\": \"pedido creado\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/logs",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "logs"]
+            },
+            "description": "Routing key INFO. En Recibidos tiene que aparecer solo monitor."
+          },
+          "response": []
+        },
+        {
+          "name": "WARNING solo monitor",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"level\": \"WARNING\",\n  \"message\": \"stock bajo\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/logs",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "logs"]
+            },
+            "description": "Routing key WARNING. Tambien solo monitor."
+          },
+          "response": []
+        },
+        {
+          "name": "ERROR monitor y alerta",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"level\": \"ERROR\",\n  \"message\": \"fallo al cobrar\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/logs",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "logs"]
+            },
+            "description": "Routing key ERROR. En Recibidos aparecen monitor y alerta."
+          },
+          "response": []
+        },
+        {
+          "name": "error en minuscula",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"level\": \"error\",\n  \"message\": \"no coincide\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/logs",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "logs"]
+            },
+            "description": "Direct compara letra por letra. Responde 400 y no publica."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Fanout",
+      "item": [
+        {
+          "name": "Aviso correo y app",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"message\": \"pedido listo\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/avisos",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "avisos"]
+            },
+            "description": "Fanout avisos. En Recibidos aparecen correo y app."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Topic",
+      "item": [
+        {
+          "name": "pedido.creado",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"routingKey\": \"pedido.creado\",\n  \"message\": \"pedido 18\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/eventos",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "eventos"]
+            },
+            "description": "Calza con pedido.* y con *.creado. No calza con factura.#."
+          },
+          "response": []
+        },
+        {
+          "name": "factura.octubre",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"routingKey\": \"factura.octubre\",\n  \"message\": \"boleta 4\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/eventos",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "eventos"]
+            },
+            "description": "Calza con factura.#."
+          },
+          "response": []
+        },
+        {
+          "name": "pedido.creado.chile",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"routingKey\": \"pedido.creado.chile\",\n  \"message\": \"tres palabras\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/eventos",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "eventos"]
+            },
+            "description": "pedido.* acepta una sola palabra. Esta key no entra a ninguna de las tres colas."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "DLQ",
+      "item": [
+        {
+          "name": "Pedido que sale bien",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": \"18\",\n  \"fallar\": false\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/pedidos",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "pedidos"]
+            },
+            "description": "basicAck. orders.queue dice ack. No aparece en orders.dlq."
+          },
+          "response": []
+        },
+        {
+          "name": "Pedido que falla",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": \"19\",\n  \"fallar\": true\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/pedidos",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "pedidos"]
+            },
+            "description": "basicNack sin requeue. orders.queue dice nack y orders.dlq dice cuarentena."
+          },
+          "response": []
+        },
+        {
+          "name": "Espera 8 segundos",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": \"20\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/pedidos/espera",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "pedidos", "espera"]
+            },
+            "description": "Nadie lee orders.espera. A los 8 segundos el mensaje aparece en orders.dlq."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Recibidos",
+      "item": [
+        {
+          "name": "Ver recibidos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/api/recibidos",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "recibidos"]
+            },
+            "description": "Llamalo un segundo despues de cada POST. Despues del pedido en espera, espera 8 segundos."
+          },
+          "response": []
+        },
+        {
+          "name": "Vaciar recibidos",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/api/recibidos",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "recibidos"]
+            },
+            "description": "Borra las anotaciones en memoria. No borra las colas de RabbitMQ."
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
